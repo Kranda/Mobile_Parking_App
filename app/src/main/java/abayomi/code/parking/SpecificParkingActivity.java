@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -57,8 +58,8 @@ public class SpecificParkingActivity extends AppCompatActivity {
         buttonPark.setOnClickListener(buttonOnClickListener);
         buttonAbort.setOnClickListener(buttonOnClickListener);
 
-        textViewName.setText("Parking: " + parking.parkingName);
-        textViewAvaliableLot.setText("Avaliable lot: "+String.valueOf(parking.capacity));
+        textViewName.setText("Parking: " + "Lot 1");  //parking.parkingName);
+        textViewAvaliableLot.setText("Avaliable lot: "+String.valueOf(5));   //parking.capacity));
     }
 
     View.OnClickListener buttonOnClickListener = new View.OnClickListener() {
@@ -71,16 +72,19 @@ public class SpecificParkingActivity extends AppCompatActivity {
                     parking.status = "Reserved";
                     SenderTask task = new SenderTask();
                     task.execute();
+                    Log.d(null, "Reserved");
                     break;
                 case R.id.button_Specific_Park:
                     countDownTimer.cancel();
                     parking.status = "Free";
                     textViewTimer.setText("Time remaining: 10 min" );
+                    Log.d(null, "Parked");
                     break;
                 case R.id.button_Specific_Abort:
                     countDownTimer.cancel();
                     parking.status = "Free";
                     textViewTimer.setText("Time remaining: 10 min");
+                    Log.d(null, "Released");
                     break;
             }
 
@@ -135,4 +139,7 @@ public class SpecificParkingActivity extends AppCompatActivity {
             startActivity(intent);
         }
     }
+
+
 }
+
