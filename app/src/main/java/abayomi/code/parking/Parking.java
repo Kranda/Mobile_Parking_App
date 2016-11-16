@@ -3,7 +3,7 @@ package abayomi.code.parking;
 import java.io.Serializable;
 
 /**
- * Created by Abayomi S on 21.09.2016.
+ * Created by Manari Kranda on 21.09.2016.
  */
 public class Parking implements Serializable {
     //String coordinates;
