@@ -1,5 +1,6 @@
 package abayomi.code.parking;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -12,6 +13,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -35,6 +37,8 @@ public class SignUpActivity extends AppCompatActivity {
     ImageView imageViewCheck;
     Button buttonSignUp;
     String name, passw1, passw2, mail, phone;
+    private static final String REGISTER_URL = "http://10.124.4.141/androidtest/register.php";
+    int responsecode = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,8 +90,9 @@ public class SignUpActivity extends AppCompatActivity {
         buttonSignUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SenderTask task = new SenderTask();
-                task.execute();
+                //SenderTask task = new SenderTask();
+                //task.execute();
+                registerUser();
             }
         });
     }
@@ -98,7 +103,7 @@ public class SignUpActivity extends AppCompatActivity {
         else imageViewCheck.setImageResource(R.drawable.redcross);
     }
 
-    private class SenderTask extends AsyncTask<Void, Void, Void> {
+   /* private class SenderTask extends AsyncTask<Void, Void, Void> {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -112,7 +117,7 @@ public class SignUpActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... params) {
             try {
-                URL url = new URL("/signUp");
+                URL url = new URL(REGISTER_URL);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
                 conn.setRequestMethod("POST");
@@ -172,5 +177,67 @@ public class SignUpActivity extends AppCompatActivity {
             Intent goBackToLogin = new Intent(getApplicationContext(), LoginActivity.class);
             startActivity(goBackToLogin);
         }
+    }*/
+
+
+    private void registerUser() {
+        //String name = "Abayomi"; //editTextName.getText().toString().trim().toLowerCase();
+        String phone = String.valueOf(editTextPhone.getText()); //editTextUsername.getText().toString().trim().toLowerCase();
+        String password = String.valueOf(editTextPassword1.getText());;//editTextPassword.getText().toString().trim().toLowerCase();
+        String email = String.valueOf(editTextMail.getText());;//editTextEmail.getText().toString().trim().toLowerCase();
+
+        register(email,phone,password);
+    }
+
+    private void register(String email, String phone, String password) {
+        String urlSuffix = "?email="+email+"&phone="+phone+"&password="+password;
+        class RegisterUser extends AsyncTask<String, Void, String>{
+
+            ProgressDialog loading;
+
+
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                loading = ProgressDialog.show(SignUpActivity.this, "Please Wait", null, true, true);
+
+                //Intent goBackToLogin = new Intent(getApplicationContext(), LoginActivity.class);
+                //startActivity(goBackToLogin);
+            }
+
+            @Override
+            protected void onPostExecute(String s) {
+                super.onPostExecute(s);
+                loading.dismiss();
+                Toast.makeText(getApplicationContext(), s, Toast.LENGTH_LONG).show();
+                if (responsecode== 200 && !(s.equals("username or email already exist")||s.equals("please fill all values"))) {
+                    Intent goBackToLogin = new Intent(getApplicationContext(), LoginActivity.class);
+                    startActivity(goBackToLogin);
+                }
+            }
+
+            @Override
+            protected String doInBackground(String... params) {
+                String s = params[0];
+                BufferedReader bufferedReader = null;
+                try {
+                    URL url = new URL(REGISTER_URL + s);
+                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                    bufferedReader = new BufferedReader(new InputStreamReader(con.getInputStream()));
+
+                    String result;
+
+                    result = bufferedReader.readLine();
+                    responsecode = con.getResponseCode();
+
+                    return result;
+                } catch (Exception e) {
+                    return null;
+                }
+            }
+        }
+
+        RegisterUser ru = new RegisterUser();
+        ru.execute(urlSuffix);
     }
 }

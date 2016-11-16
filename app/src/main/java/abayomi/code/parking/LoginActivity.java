@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -31,6 +32,7 @@ public class LoginActivity extends AppCompatActivity implements Login {
     Button buttonLogin, buttonSignUp;
     EditText editTextLogin, editTextPassword;
     String login, password;
+    private static final String LOGIN_URL = "http://10.124.4.141/androidtest/login.php";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,9 +57,10 @@ public class LoginActivity extends AppCompatActivity implements Login {
             switch (v.getId()){
                 case R.id.button_LoginActivity_Loin:
                     Log.d("OnClickListener", "Login button pressed");
-                    Intent intent = new Intent(getApplicationContext(), MapsActivity.class);
-                    if(String.valueOf(editTextLogin.getText()).equals("testuser") && String.valueOf(editTextPassword.getText()).equals("testpassword"))
-                        startActivity(intent);
+                    //Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                    new SenderTask().execute();
+                    //if(String.valueOf(editTextLogin.getText()).equals("testuser") && String.valueOf(editTextPassword.getText()).equals("testpassword"))
+                    //    startActivity(intent);
                     break;
                 case R.id.button_LoginActivity_SignUp:
                     Log.d("OnClickListener", "Login button pressed");
@@ -67,7 +70,7 @@ public class LoginActivity extends AppCompatActivity implements Login {
             }
         }
     };
-    private class SenderTask extends AsyncTask<Void, Void, Void> {
+    private class SenderTask extends AsyncTask<Void, Void, String> {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -78,9 +81,9 @@ public class LoginActivity extends AppCompatActivity implements Login {
         }
 
         @Override
-        protected Void doInBackground(Void... params) {
+        protected String doInBackground(Void... params) {
             try {
-                URL url = new URL("/login");
+                URL url = new URL(LOGIN_URL);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
                 conn.setRequestMethod("POST");
@@ -88,7 +91,7 @@ public class LoginActivity extends AppCompatActivity implements Login {
                 conn.setDoOutput(true);
 
                 Uri.Builder builder = new Uri.Builder()
-                        .appendQueryParameter("username", login)
+                        .appendQueryParameter("email", login)
                         .appendQueryParameter("password", password);
                 String query = builder.build().getEncodedQuery();
 
@@ -102,20 +105,17 @@ public class LoginActivity extends AppCompatActivity implements Login {
                 Log.d("YAP", "1");
                 InputStream is = conn.getInputStream();
                 BufferedReader reader;
-                if (conn.getResponseCode() == 200)
+                Log.d("",conn.getResponseCode()+"");
+                if (conn.getResponseCode() == 200) {
                     reader = new BufferedReader(new InputStreamReader(is));
+                    String result;
+                    result = reader.readLine();
+                    return result;
+                }
+
                 else
                     reader = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
-                StringBuilder sb = new StringBuilder();
-                Log.d("YAP", "2");
-                String line = null;
-                try {
-                    while ((line = reader.readLine()) != null) {
-                        sb.append(line + "\n");
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+
                 is.close();
                 Log.d("YAP", "3");
 
@@ -135,10 +135,13 @@ public class LoginActivity extends AppCompatActivity implements Login {
         }
 
         @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-            startActivity(intent);
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            Toast.makeText(getApplicationContext(), s, Toast.LENGTH_LONG).show();
+            if(s.equals("login success")) {
+                Intent intent = new Intent(getApplicationContext(), MapsActivity.class);
+                startActivity(intent);
+            }
         }
     }
 }

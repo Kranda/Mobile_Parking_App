@@ -24,6 +24,7 @@ public class ParkingListViewAdapter extends BaseAdapter {
     ArrayList<Parking> objects;
     View view;
     Parking parking;
+    boolean flag[] = {true, false, false, false, true};
 
 
     public ParkingListViewAdapter(Context context, ArrayList<Parking> objects) {
@@ -50,9 +51,20 @@ public class ParkingListViewAdapter extends BaseAdapter {
 
     @Override
     public View getView(final int position, View convertView, final ViewGroup parent) {
+
+
+       // view = inflter.inflate(R.layout.activity_gridview, null);
+       // ImageView icon = (ImageView) view.findViewById(R.id.icon);
+       // icon.setImageResource(flags[i]);
+       // return view;
+
+
+
+
         view = convertView;
         if (view == null) {
-            view = layoutInflater.inflate(R.layout.parking_item, parent, false);
+            //view = layoutInflater.inflate(R.layout.parking_item, parent, false);
+            view = layoutInflater.inflate(R.layout.parking_grid, parent, false);
         }
         parking = getParking(position);
         view.setClickable(true);
@@ -69,10 +81,12 @@ public class ParkingListViewAdapter extends BaseAdapter {
             }
 
         });
-        ((TextView)(view.findViewById(R.id.textView_ParkingItem_ParkingName))).setText(parking.parkingName);
-        if(parking.capacity>0)
-            ((ImageView)(view.findViewById(R.id.imageView_ParkingItem_Checker))).setImageResource(R.drawable.greentick);
-        else ((ImageView)(view.findViewById(R.id.imageView_ParkingItem_Checker))).setImageResource(R.drawable.redcross);
+
+
+        //((TextView)(view.findViewById(R.id.textView_ParkingItem_ParkingName))).setText(parking.parkingName);
+        //if(parking.capacity>0)
+        //    ((ImageView)(view.findViewById(R.id.imageView_ParkingItem_Checker))).setImageResource(R.drawable.greentick);
+        //else ((ImageView)(view.findViewById(R.id.imageView_ParkingItem_Checker))).setImageResource(R.drawable.redcross);
 
         return view;
     }

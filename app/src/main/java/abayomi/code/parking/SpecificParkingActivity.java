@@ -10,9 +10,13 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
@@ -29,6 +33,7 @@ public class SpecificParkingActivity extends AppCompatActivity {
     Button buttonReserve, buttonPark, buttonAbort;
     CountDownTimer countDownTimer;
     Parking parking;
+    private static final String PRRL_URL = "http://10.124.4.141/androidtest/prrl.php";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,8 +63,8 @@ public class SpecificParkingActivity extends AppCompatActivity {
         buttonPark.setOnClickListener(buttonOnClickListener);
         buttonAbort.setOnClickListener(buttonOnClickListener);
 
-        textViewName.setText("Parking: " + "Lot 1");  //parking.parkingName);
-        textViewAvaliableLot.setText("Avaliable lot: "+String.valueOf(5));   //parking.capacity));
+        textViewName.setText("Parking: " + parking.parkingName);
+        textViewAvaliableLot.setText("Avaliable lot: "+ parking.capacity);
     }
 
     View.OnClickListener buttonOnClickListener = new View.OnClickListener() {
@@ -91,16 +96,16 @@ public class SpecificParkingActivity extends AppCompatActivity {
         }
     };
 
-    private class SenderTask extends AsyncTask<Void, Void, Void> {
+    private class SenderTask extends AsyncTask<Void, Void, String> {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
         }
 
         @Override
-        protected Void doInBackground(Void... params) {
+        protected String doInBackground(Void... params) {
             try {
-                URL url = new URL("/changeState");
+                URL url = new URL(PRRL_URL);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
                 conn.setRequestMethod("POST");
@@ -108,7 +113,7 @@ public class SpecificParkingActivity extends AppCompatActivity {
                 conn.setDoOutput(true);
 
                 Uri.Builder builder = new Uri.Builder()
-                        .appendQueryParameter("parkingName", parking.parkingName )
+                        .appendQueryParameter("lot_id", parking.id+"")
                         .appendQueryParameter("status", parking.status );
                 String query = builder.build().getEncodedQuery();
 
@@ -119,6 +124,24 @@ public class SpecificParkingActivity extends AppCompatActivity {
                 writer.flush();
                 writer.close();
                 os.close();
+
+                Log.d("YAP", "1");
+                InputStream is = conn.getInputStream();
+                BufferedReader reader;
+                Log.d("",conn.getResponseCode()+"");
+                if (conn.getResponseCode() == 200) {
+                    reader = new BufferedReader(new InputStreamReader(is));
+                    String result;
+                    result = reader.readLine();
+                    return result;
+                }
+
+                else
+                    reader = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
+
+                is.close();
+                Log.d("YAP", "3");
+
                 conn.connect();
             } catch (MalformedURLException e) {
                 e.printStackTrace();
@@ -133,9 +156,10 @@ public class SpecificParkingActivity extends AppCompatActivity {
         }
 
         @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            Toast.makeText(getApplicationContext(), s, Toast.LENGTH_LONG).show();
+            Intent intent = new Intent(getApplicationContext(), MapsActivity.class);
             startActivity(intent);
         }
     }

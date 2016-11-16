@@ -3,10 +3,17 @@ package abayomi.code.parking;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.ListView;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,6 +21,7 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import abayomi.code.parking.R;
 
@@ -34,8 +42,9 @@ public class MainActivity extends AppCompatActivity {
 
         JSONTask parseData = new JSONTask();
         parseData.execute();
-        adapter = new ParkingListViewAdapter(this, parkings);
-        listViewParkings.setAdapter(adapter);
+        adapter = new ParkingListViewAdapter(this, parkings); //whats doing
+        Log.d("Adapt", "Adapter");
+        listViewParkings.setAdapter(adapter); //whats doing
     }
     /**
      * AssyncTask to parse JSON.
@@ -58,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
         URL textUrl;
         String textResult;
         try {
-            textUrl = new URL(ipToParse);
+           /* textUrl = new URL(ipToParse);
             BufferedReader bufferReader
                     = new BufferedReader(new InputStreamReader(textUrl.openStream()));
             String StringBuffer;
@@ -68,19 +77,52 @@ public class MainActivity extends AppCompatActivity {
             }
             bufferReader.close();
             textResult = stringText;
+            */
+            //String js = "{'id':24,'capacity':7,'status':'full','parkingName':'Lot1', 'lat':'60', 'lng':'11'}";
+            String js = "{'result1': {'id':24,'capacity':7,'status':'full','parkingName':'Lot1', 'lat':'60', 'lng':'11'},'result2': {'id':24,'capacity':10,'status':'full','parkingName':'Lot2', 'lat':'60', 'lng':'11'}}" ;
+                    //textResult = js;
+
+
+            //insert JSon file..
+            /*
+
+            {
+                “Field” : “value”,
+                “Field” : “value”,
+                “Field” : “value”,
+                “Field” : “value”,
+            }
+
+
+
+            String coordinates;
+            int id;
+            int capacity;
+            String status;
+            String parkingName;
+             */
+
             /*JSON parser*/
             parkings.clear();
-            GsonBuilder builder = new GsonBuilder();
-            Gson gson = builder.create();
-            Parking[] murzik = gson.fromJson(textResult, Parking[].class);
-            for(Parking a : murzik)
-                parkings.add(a);
 
-        } catch (MalformedURLException e) {
+            Gson gson = new Gson();
+
+            JSONObject jsonObj = new JSONObject(js);
+            Iterator<String> keys = jsonObj.keys();
+            int i = 0;
+            while( keys.hasNext() ) {
+                String key = keys.next();
+                Log.d("json", key);
+                JSONObject jobj2 = jsonObj.getJSONObject(key);
+                parkings.add(i++, gson.fromJson(jobj2.toString(), Parking.class));
+            }
+
+
+        //} catch (MalformedURLException e) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
-            textResult = e.toString();
-        } catch (IOException e) {
+        //    e.printStackTrace();
+        //    textResult = e.toString();
+        } catch (Exception e) {//(IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
             textResult = e.toString();
